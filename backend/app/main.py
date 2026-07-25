@@ -21,7 +21,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title=settings.app_name,
     description="API for the DataInsight AI automated data analysis platform.",
-    version="0.6.0",
+    version="0.7.0",
     debug=settings.debug,
     lifespan=lifespan,
 )

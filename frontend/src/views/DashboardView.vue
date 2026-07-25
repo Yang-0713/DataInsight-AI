@@ -69,10 +69,10 @@ const upcomingModules = [
 
     <div class="phase-status">
       <div>
-        <span class="status-kicker">PHASE 6</span>
-        <strong>AI 数据分析师</strong>
+        <span class="status-kicker">PHASE 7</span>
+        <strong>开源发布准备</strong>
       </div>
-      <p>自然语言问答、结构化上下文、HTML 综合报告与历史结果已经连接。</p>
+      <p>完整中文文档、示例数据、贡献规范和持续集成工作流已经就绪。</p>
       <span class="status-complete">已完成</span>
     </div>
 
