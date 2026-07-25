@@ -51,9 +51,9 @@ const upcomingModules = [
       <div>
         <p class="eyebrow">AUTHENTICATED WORKSPACE</p>
         <h1>你好，{{ authStore.user?.username }}。</h1>
-        <p>你的个人数据空间已经就绪。上传 CSV，开始构建可分析的数据资产。</p>
-        <RouterLink class="dataset-cta" to="/datasets">
-          管理数据集
+        <p>你的个人数据空间已经就绪。上传 CSV，并用自动 EDA 快速理解数据质量和分布。</p>
+        <RouterLink class="dataset-cta" :to="datasetStore.count ? '/analysis' : '/datasets'">
+          {{ datasetStore.count ? '开始自动分析' : '上传数据集' }}
           <span>{{ datasetStore.count }} 个</span>
         </RouterLink>
       </div>
@@ -69,19 +69,19 @@ const upcomingModules = [
 
     <div class="phase-status">
       <div>
-        <span class="status-kicker">PHASE 3</span>
-        <strong>数据集上传与管理</strong>
+        <span class="status-kicker">PHASE 4</span>
+        <strong>自动化探索性数据分析</strong>
       </div>
-      <p>CSV 验证、本地文件存储、MySQL 元数据和用户级访问控制已连接。</p>
+      <p>字段画像、描述性统计、分析结果持久化和 ECharts 自动图表已经连接。</p>
       <span class="status-complete">已完成</span>
     </div>
 
     <div class="module-heading">
       <div>
-        <span>接下来</span>
+        <span>分析能力</span>
         <h2>你的分析能力路线图</h2>
       </div>
-      <p>每个模块都会建立在当前安全账户体系之上。</p>
+      <p>自动 EDA 已可使用，后续模块将复用当前分析结果。</p>
     </div>
 
     <div class="module-grid">

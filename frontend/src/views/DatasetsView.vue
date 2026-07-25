@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import {
+  DataAnalysis,
   Delete,
   Document,
   InfoFilled,
@@ -12,12 +13,14 @@ import {
   type UploadFile,
   type UploadInstance,
 } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 import type { Dataset } from '../api/datasets'
 import { useDatasetStore } from '../store/datasets'
 import { getApiErrorMessage } from '../utils/errors'
 
 const datasetStore = useDatasetStore()
+const router = useRouter()
 const uploadRef = ref<UploadInstance>()
 const selectedFile = ref<File | null>(null)
 const detailVisible = ref(false)
@@ -118,6 +121,14 @@ function formatDate(value: string): string {
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat('zh-CN').format(value)
+}
+
+async function openAnalysis(dataset: Dataset): Promise<void> {
+  detailVisible.value = false
+  await router.push({
+    name: 'analysis',
+    params: { datasetId: String(dataset.id) },
+  })
 }
 </script>
 
@@ -233,8 +244,16 @@ function formatNumber(value: number): string {
             <el-table-column min-width="170" label="上传时间">
               <template #default="{ row }">{{ formatDate(row.created_at) }}</template>
             </el-table-column>
-            <el-table-column width="120" align="right">
+            <el-table-column width="170" align="right">
               <template #default="{ row }">
+                <el-button
+                  circle
+                  text
+                  type="primary"
+                  :icon="DataAnalysis"
+                  aria-label="分析数据集"
+                  @click="openAnalysis(row)"
+                />
                 <el-button
                   circle
                   text
@@ -284,12 +303,14 @@ function formatNumber(value: number): string {
             <strong>{{ formatDate(selectedDataset.created_at) }}</strong>
           </div>
 
-          <el-alert
-            title="数据画像、统计信息和字段详情将在第四阶段生成。"
-            type="info"
-            :closable="false"
-            show-icon
-          />
+          <el-button
+            class="detail-analysis"
+            type="primary"
+            :icon="DataAnalysis"
+            @click="openAnalysis(selectedDataset)"
+          >
+            开始自动 EDA
+          </el-button>
 
           <el-button
             class="detail-delete"
@@ -609,7 +630,11 @@ function formatNumber(value: number): string {
 
 .detail-delete {
   width: 100%;
-  margin-top: 26px;
+  margin-top: 12px;
+}
+
+.detail-analysis {
+  width: 100%;
 }
 
 @media (max-width: 900px) {
