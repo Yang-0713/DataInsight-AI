@@ -51,9 +51,9 @@ const upcomingModules = [
       <div>
         <p class="eyebrow">AUTHENTICATED WORKSPACE</p>
         <h1>你好，{{ authStore.user?.username }}。</h1>
-        <p>你的个人数据空间已经就绪。上传 CSV，并用自动 EDA 快速理解数据质量和分布。</p>
-        <RouterLink class="dataset-cta" :to="datasetStore.count ? '/analysis' : '/datasets'">
-          {{ datasetStore.count ? '开始自动分析' : '上传数据集' }}
+        <p>你的分析工作台已经就绪。用 PCA 理解数据结构，并通过双重算法发现异常样本。</p>
+        <RouterLink class="dataset-cta" :to="datasetStore.count ? '/machine-learning' : '/datasets'">
+          {{ datasetStore.count ? '开始异常检测' : '上传数据集' }}
           <span>{{ datasetStore.count }} 个</span>
         </RouterLink>
       </div>
@@ -69,10 +69,10 @@ const upcomingModules = [
 
     <div class="phase-status">
       <div>
-        <span class="status-kicker">PHASE 4</span>
-        <strong>自动化探索性数据分析</strong>
+        <span class="status-kicker">PHASE 5</span>
+        <strong>机器学习与异常检测</strong>
       </div>
-      <p>字段画像、描述性统计、分析结果持久化和 ECharts 自动图表已经连接。</p>
+      <p>PCA、Isolation Forest、LOF、特征预处理和结果持久化已经连接。</p>
       <span class="status-complete">已完成</span>
     </div>
 
@@ -81,7 +81,7 @@ const upcomingModules = [
         <span>分析能力</span>
         <h2>你的分析能力路线图</h2>
       </div>
-      <p>自动 EDA 已可使用，后续模块将复用当前分析结果。</p>
+      <p>EDA 与机器学习均可使用，AI 模块将复用这些结构化结果。</p>
     </div>
 
     <div class="module-grid">

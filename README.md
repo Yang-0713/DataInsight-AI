@@ -2,9 +2,9 @@
 
 DataInsight AI 是一个开源的 AI 自动化数据分析平台，旨在帮助用户上传数据集、检查数据质量、完成统计分析与数据可视化、检测异常样本，并生成由 AI 辅助的分析结论和报告。
 
-> 当前进度：**第四阶段——自动化探索性数据分析（EDA）**
+> 当前进度：**第五阶段——机器学习分析与异常检测**
 
-项目目前已经具备用户注册与登录、JWT 身份认证、用户私有的 CSV 数据集管理，以及自动数据画像、描述性统计、可视化生成和分析结果持久化功能。
+项目目前已经具备用户注册与登录、JWT 身份认证、用户私有的 CSV 数据集管理、自动 EDA，以及 PCA、Isolation Forest 和 LOF 机器学习分析能力。
 
 ## 当前功能
 
@@ -40,11 +40,24 @@ DataInsight AI 是一个开源的 AI 自动化数据分析平台，旨在帮助�
 - 分析结果以结构化 JSON 保存至 MySQL
 - 数据集和分析结果均执行用户级访问隔离
 
+### 机器学习分析
+
+- 自动识别或手动选择参与分析的数值字段
+- 使用中位数补全缺失值，并通过 StandardScaler 标准化
+- PCA 返回主成分载荷、解释方差比例和二维样本投影
+- Isolation Forest 检测全局异常样本
+- Local Outlier Factor（LOF）检测局部密度异常
+- 两种异常算法统一返回样本编号、0–1 异常分数和判断标签
+- 前端提供 PCA 散点图、异常分数对比、主成分载荷和样本复核表
+- 机器学习结果以 `ML` 类型保存至 `analysis_results`
+- 自动排除常见的唯一编号字段，允许用户重新选择特征
+- 单次机器学习分析默认最多处理 5,000 行，防止 LOF 占用过多内存
+
 ## 技术栈
 
 - 前端：Vue 3、Vite、TypeScript、Element Plus、Pinia、Axios、ECharts、Tailwind CSS
 - 后端：Python 3.10、FastAPI、SQLAlchemy、PyMySQL、Pydantic Settings
-- 数据处理：pandas、NumPy
+- 数据处理：pandas、NumPy、SciPy、scikit-learn
 - 身份认证：Argon2、PyJWT
 - 数据库：本地 MySQL 8+
 
@@ -77,6 +90,8 @@ mysql -u root -p < database/migrations/004_create_analysis_results.sql
 ```powershell
 mysql -u root -p < database/migrations/004_create_analysis_results.sql
 ```
+
+第五阶段复用 `analysis_results` 表，不需要新的数据库迁移。
 
 完整初始化脚本会创建：
 
@@ -113,6 +128,7 @@ DATAINSIGHT_MYSQL_DATABASE=datainsight_ai
 DATAINSIGHT_JWT_SECRET_KEY=replace-with-a-long-random-secret-key
 DATAINSIGHT_DATASET_STORAGE_DIR=../datasets
 DATAINSIGHT_MAX_UPLOAD_SIZE_MB=50
+DATAINSIGHT_MAX_ML_ROWS=5000
 ```
 
 可以使用 PowerShell 生成随机 JWT 密钥：
@@ -178,6 +194,25 @@ npm run dev
 | `POST` | `/api/analysis/{dataset_id}` | 运行自动 EDA 并保存结果 |
 | `GET` | `/api/results/{result_id}` | 获取指定的已保存分析结果 |
 
+### 机器学习
+
+| 方法 | 地址 | 说明 |
+| --- | --- | --- |
+| `GET` | `/api/ml/{dataset_id}/features` | 获取可用于建模的数值字段 |
+| `POST` | `/api/ml/{dataset_id}` | 运行 PCA、Isolation Forest 和 LOF |
+
+机器学习请求示例：
+
+```json
+{
+  "features": ["sales", "cost", "profit"],
+  "contamination": 0.05,
+  "lof_neighbors": 20
+}
+```
+
+`features` 可以省略，系统会自动选择数值字段并排除常见的唯一编号列。`contamination` 表示预计异常比例，取值范围为大于 `0` 且不超过 `0.5`。
+
 分析结果中的 `result_json` 包含：
 
 - `dataset`：数据集基础信息
@@ -205,6 +240,15 @@ curl -X POST http://127.0.0.1:8000/api/datasets/upload \
 ```bash
 curl -X POST http://127.0.0.1:8000/api/analysis/1 \
   -H "Authorization: Bearer <access_token>"
+```
+
+运行机器学习分析：
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/ml/1 \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d "{\"contamination\": 0.05, \"lof_neighbors\": 20}"
 ```
 
 ## 数据存储
@@ -237,16 +281,17 @@ DataInsight-AI/
 ├── backend/
 │   └── app/
 │       ├── api/              FastAPI 路由与依赖
+│       ├── algorithms/       PCA、Isolation Forest 和 LOF
 │       ├── core/             配置、密码和 JWT
 │       ├── database/         SQLAlchemy 连接
 │       ├── models/           用户、数据集和分析结果模型
 │       ├── schemas/          请求与响应模型
-│       └── services/         认证、存储、数据画像、统计和可视化
+│       └── services/         认证、存储、EDA 与机器学习编排
 ├── database/
 │   ├── init_db.sql           完整初始化脚本
 │   └── migrations/           分阶段数据库迁移
 ├── datasets/                 本地上传文件
-├── algorithms/               机器学习算法（后续阶段）
+├── algorithms/               可从项目根目录复用的算法公开入口
 ├── reports/                  分析报告（后续阶段）
 └── tests/                    后端自动化测试
 ```
@@ -260,6 +305,7 @@ DataInsight-AI/
 | `DATAINSIGHT_ACCESS_TOKEN_EXPIRE_MINUTES` | 访问令牌有效时间 |
 | `DATAINSIGHT_DATASET_STORAGE_DIR` | CSV 本地存储目录 |
 | `DATAINSIGHT_MAX_UPLOAD_SIZE_MB` | 单个上传文件大小上限 |
+| `DATAINSIGHT_MAX_ML_ROWS` | 单次机器学习分析允许的最大记录数 |
 | `DATAINSIGHT_AUTO_CREATE_TABLES` | 启动时是否创建已实现的数据表 |
 
 请勿提交包含真实数据库密码、JWT 密钥或其他敏感信息的 `.env` 文件。
@@ -287,11 +333,11 @@ npm run build
 2. 注册、登录、JWT 身份认证与用户持久化——已完成
 3. CSV 数据集上传、存储和管理——已完成
 4. 自动化数据画像、统计分析与可视化——已完成
-5. PCA、Isolation Forest 和 Local Outlier Factor
+5. PCA、Isolation Forest 和 Local Outlier Factor——已完成
 6. AI 数据分析师与 HTML 报告生成
 7. 示例数据、完整文档和贡献指南
 
-下一步建议进入第五阶段，实现 PCA、Isolation Forest 和 Local Outlier Factor，并复用第四阶段的结构化分析结果。
+下一步建议进入第六阶段，实现可扩展的 AI 数据分析服务、提示词编排和 HTML 分析报告。
 
 ## 开源协议
 

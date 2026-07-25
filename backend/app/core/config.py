@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     dataset_storage_dir: Path = Path("../datasets")
     max_upload_size_mb: int = Field(default=50, ge=1, le=500)
+    max_ml_rows: int = Field(default=5000, ge=100, le=50000)
 
     cors_origins: list[str] = [
         "http://127.0.0.1:5173",

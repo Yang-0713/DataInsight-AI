@@ -41,6 +41,7 @@ async function logout(): Promise<void> {
             <RouterLink to="/dashboard">工作台</RouterLink>
             <RouterLink to="/datasets">数据集</RouterLink>
             <RouterLink to="/analysis">分析</RouterLink>
+            <RouterLink to="/machine-learning">机器学习</RouterLink>
           </nav>
           <span class="user-chip">
             <span class="user-avatar">{{ authStore.user.username.slice(0, 1).toUpperCase() }}</span>
@@ -56,7 +57,7 @@ async function logout(): Promise<void> {
             返回登录
           </RouterLink>
         </template>
-        <span class="phase-badge">第四阶段</span>
+        <span class="phase-badge">第五阶段</span>
       </div>
     </header>
 
