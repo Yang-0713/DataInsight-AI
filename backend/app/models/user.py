@@ -2,7 +2,8 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import DateTime, Enum as SqlEnum, Integer, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.mysql import INTEGER as MySqlInteger
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
@@ -15,7 +16,11 @@ class UserRole(str, Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        Integer().with_variant(MySqlInteger(unsigned=True), "mysql"),
+        primary_key=True,
+        autoincrement=True,
+    )
     username: Mapped[str] = mapped_column(
         String(50), unique=True, index=True, nullable=False
     )
@@ -33,3 +38,11 @@ class User(Base):
         server_default=func.now(),
         nullable=False,
     )
+    datasets: Mapped[list["Dataset"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+from app.models.dataset import Dataset  # noqa: E402
