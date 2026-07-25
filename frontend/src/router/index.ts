@@ -49,6 +49,12 @@ const router = createRouter({
       component: () => import('../views/MachineLearningView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/ai-analyst/:datasetId?',
+      name: 'ai-analyst',
+      component: () => import('../views/AIAnalystView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

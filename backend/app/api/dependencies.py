@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.ai.provider import AIProvider, OpenAICompatibleProvider
 from app.core.security import decode_access_token
 from app.core.config import get_settings
 from app.database.session import get_db
@@ -54,3 +55,34 @@ def get_dataset_storage() -> Path:
 
 
 DatasetStorage = Annotated[Path, Depends(get_dataset_storage)]
+
+
+def get_report_storage() -> Path:
+    return get_settings().report_storage_path
+
+
+ReportStorage = Annotated[Path, Depends(get_report_storage)]
+
+
+def get_ai_provider() -> AIProvider:
+    settings = get_settings()
+    if not settings.ai_configured or settings.openai_api_key is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "AI 服务尚未配置，请在 backend/.env 中设置 "
+                "DATAINSIGHT_OPENAI_API_KEY"
+            ),
+        )
+    return OpenAICompatibleProvider(
+        api_key=settings.openai_api_key.get_secret_value(),
+        base_url=settings.openai_base_url,
+        model=settings.openai_model,
+        api_mode=settings.openai_api_mode,
+        reasoning_effort=settings.openai_reasoning_effort,
+        max_output_tokens=settings.openai_max_output_tokens,
+        timeout_seconds=settings.openai_timeout_seconds,
+    )
+
+
+AIProviderDependency = Annotated[AIProvider, Depends(get_ai_provider)]
