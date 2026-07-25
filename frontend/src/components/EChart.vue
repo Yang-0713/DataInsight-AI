@@ -4,6 +4,7 @@ import {
   BoxplotChart,
   HeatmapChart,
   LineChart,
+  ScatterChart,
 } from 'echarts/charts'
 import {
   DataZoomComponent,
@@ -26,6 +27,7 @@ use([
   BoxplotChart,
   HeatmapChart,
   LineChart,
+  ScatterChart,
   DataZoomComponent,
   GridComponent,
   LegendComponent,

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -14,21 +15,25 @@ class AnalysisSourceError(ValueError):
     """Raised when a stored dataset can no longer be analyzed."""
 
 
-def run_eda(
-    *,
-    database: Session,
-    dataset: Dataset,
-    storage_root: Path,
-) -> AnalysisResult:
+def load_dataset_frame(dataset: Dataset, storage_root: Path) -> pd.DataFrame:
     root = storage_root.resolve()
     stored_path = (root / dataset.filepath).resolve()
     if not stored_path.is_relative_to(root) or not stored_path.is_file():
         raise AnalysisSourceError("数据集源文件不存在，请重新上传")
 
     try:
-        frame = load_csv(stored_path)
+        return load_csv(stored_path)
     except InvalidCsvError as error:
         raise AnalysisSourceError(str(error)) from error
+
+
+def run_eda(
+    *,
+    database: Session,
+    dataset: Dataset,
+    storage_root: Path,
+) -> AnalysisResult:
+    frame = load_dataset_frame(dataset, storage_root)
 
     result_json = {
         "dataset": {

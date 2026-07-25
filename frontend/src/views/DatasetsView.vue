@@ -5,6 +5,7 @@ import {
   Delete,
   Document,
   InfoFilled,
+  TrendCharts,
   UploadFilled,
 } from '@element-plus/icons-vue'
 import {
@@ -130,6 +131,14 @@ async function openAnalysis(dataset: Dataset): Promise<void> {
     params: { datasetId: String(dataset.id) },
   })
 }
+
+async function openMachineLearning(dataset: Dataset): Promise<void> {
+  detailVisible.value = false
+  await router.push({
+    name: 'machine-learning',
+    params: { datasetId: String(dataset.id) },
+  })
+}
 </script>
 
 <template>
@@ -244,7 +253,7 @@ async function openAnalysis(dataset: Dataset): Promise<void> {
             <el-table-column min-width="170" label="上传时间">
               <template #default="{ row }">{{ formatDate(row.created_at) }}</template>
             </el-table-column>
-            <el-table-column width="170" align="right">
+            <el-table-column width="210" align="right">
               <template #default="{ row }">
                 <el-button
                   circle
@@ -253,6 +262,14 @@ async function openAnalysis(dataset: Dataset): Promise<void> {
                   :icon="DataAnalysis"
                   aria-label="分析数据集"
                   @click="openAnalysis(row)"
+                />
+                <el-button
+                  circle
+                  text
+                  type="success"
+                  :icon="TrendCharts"
+                  aria-label="机器学习分析"
+                  @click="openMachineLearning(row)"
                 />
                 <el-button
                   circle
@@ -310,6 +327,15 @@ async function openAnalysis(dataset: Dataset): Promise<void> {
             @click="openAnalysis(selectedDataset)"
           >
             开始自动 EDA
+          </el-button>
+
+          <el-button
+            class="detail-ml"
+            type="success"
+            :icon="TrendCharts"
+            @click="openMachineLearning(selectedDataset)"
+          >
+            运行机器学习分析
           </el-button>
 
           <el-button
@@ -635,6 +661,11 @@ async function openAnalysis(dataset: Dataset): Promise<void> {
 
 .detail-analysis {
   width: 100%;
+}
+
+.detail-ml {
+  width: 100%;
+  margin: 10px 0 0 !important;
 }
 
 @media (max-width: 900px) {
