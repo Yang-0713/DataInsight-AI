@@ -1,6 +1,7 @@
 from functools import lru_cache
 from urllib.parse import quote_plus
 
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,12 +20,17 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = False
     api_prefix: str = "/api"
+    auto_create_tables: bool = True
 
     mysql_host: str = "127.0.0.1"
     mysql_port: int = 3306
     mysql_user: str = "root"
     mysql_password: str = ""
     mysql_database: str = "datainsight_ai"
+
+    jwt_secret_key: SecretStr = Field(min_length=32)
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = Field(default=60, ge=5, le=1440)
 
     cors_origins: list[str] = [
         "http://127.0.0.1:5173",
@@ -45,4 +51,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-
