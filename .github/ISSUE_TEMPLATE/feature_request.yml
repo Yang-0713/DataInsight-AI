@@ -1,0 +1,43 @@
+name: 功能建议
+description: 提议新的用户能力或开发改进
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 使用场景
+      description: 说明你希望解决的问题，而不只是描述解决方案。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 描述期望的交互、API 或行为。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案
+      description: 说明已经尝试或考虑过的替代方式。
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 兼容性与数据影响
+      description: 是否涉及数据库迁移、外部 AI、敏感数据、资源消耗或破坏性变化？
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已搜索现有 Issue，确认没有重复建议。
+          required: true
+        - label: 此建议不包含真实密钥或敏感数据。
+          required: true

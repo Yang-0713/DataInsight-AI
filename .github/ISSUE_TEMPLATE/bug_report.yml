@@ -1,0 +1,75 @@
+name: 缺陷报告
+description: 报告可以稳定复现的问题
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请先移除密码、令牌、API 密钥、真实用户数据和服务器路径。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 清楚说明实际发生了什么，以及你期望发生什么。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 启动……
+        2. 上传……
+        3. 点击……
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息
+      description: 操作系统、Python、Node.js、MySQL 和浏览器版本。
+      placeholder: |
+        OS: Windows 11
+        Python: 3.10.x
+        Node.js: 20.x
+        MySQL: 8.x
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 已脱敏的日志
+      description: 可以粘贴错误堆栈，但不得包含密钥或真实数据。
+      render: shell
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 影响模块
+      options:
+        - 后端 API
+        - 前端页面
+        - 数据库
+        - EDA
+        - 机器学习
+        - AI 分析与报告
+        - 文档或安装
+        - 其他
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已搜索现有 Issue，确认没有重复报告。
+          required: true
+        - label: 我已移除密钥和敏感数据。
+          required: true

@@ -22,6 +22,6 @@ api_router.include_router(reports_router)
 def api_root() -> dict[str, str]:
     return {
         "name": "DataInsight AI API",
-        "version": "0.6.0",
+        "version": "0.7.0",
         "docs": "/docs",
     }

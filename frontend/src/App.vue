@@ -58,7 +58,7 @@ async function logout(): Promise<void> {
             返回登录
           </RouterLink>
         </template>
-        <span class="phase-badge">第六阶段</span>
+        <span class="phase-badge">第七阶段</span>
       </div>
     </header>
 
