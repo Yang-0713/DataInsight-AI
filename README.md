@@ -2,9 +2,9 @@
 
 DataInsight AI 是一个开源的 AI 自动化数据分析平台，旨在帮助用户上传数据集、检查数据质量、完成统计分析与数据可视化、检测异常样本，并生成由 AI 辅助的分析结论和报告。
 
-> 当前进度：**第五阶段——机器学习分析与异常检测**
+> 当前进度：**第六阶段——AI 数据分析师与智能报告**
 
-项目目前已经具备用户注册与登录、JWT 身份认证、用户私有的 CSV 数据集管理、自动 EDA，以及 PCA、Isolation Forest 和 LOF 机器学习分析能力。
+项目目前已经具备用户注册与登录、JWT 身份认证、用户私有的 CSV 数据集管理、自动 EDA、PCA、Isolation Forest 和 LOF 机器学习分析，以及基于结构化摘要的 AI 问答和 HTML 综合报告能力。
 
 ## 当前功能
 
@@ -53,11 +53,25 @@ DataInsight AI 是一个开源的 AI 自动化数据分析平台，旨在帮助�
 - 自动排除常见的唯一编号字段，允许用户重新选择特征
 - 单次机器学习分析默认最多处理 5,000 行，防止 LOF 占用过多内存
 
+### AI 数据分析师
+
+- 根据当前数据集的最新 EDA 和机器学习结果进行自然语言问答
+- 没有 EDA 结果时自动执行一次 EDA，再构建 AI 上下文
+- 只向配置的 AI 服务发送数据规模、数据质量、描述性统计、图表说明和异常摘要，不发送原始 CSV
+- 通过安全提示词约束模型：不得编造数据、因果关系或不存在的业务背景
+- 默认使用 OpenAI Responses API，也支持切换到 OpenAI 兼容的 Chat Completions 服务
+- 模型、服务地址、推理强度、超时时间和最大输出长度均可通过环境变量配置
+- AI 问答以 `AI_CHAT` 类型保存至 `analysis_results`
+- 一键生成包含数据概览、统计表、机器学习摘要、重要发现、问题和建议的 HTML 报告
+- 报告保存到本地 `reports/用户ID/`，并以 `AI_REPORT` 类型记录元数据
+- 报告列表、下载和删除均执行用户级隔离；删除数据集时同步删除对应报告
+
 ## 技术栈
 
 - 前端：Vue 3、Vite、TypeScript、Element Plus、Pinia、Axios、ECharts、Tailwind CSS
 - 后端：Python 3.10、FastAPI、SQLAlchemy、PyMySQL、Pydantic Settings
 - 数据处理：pandas、NumPy、SciPy、scikit-learn
+- AI 接入：OpenAI Responses API、OpenAI 兼容接口、HTTPX
 - 身份认证：Argon2、PyJWT
 - 数据库：本地 MySQL 8+
 
@@ -91,7 +105,7 @@ mysql -u root -p < database/migrations/004_create_analysis_results.sql
 mysql -u root -p < database/migrations/004_create_analysis_results.sql
 ```
 
-第五阶段复用 `analysis_results` 表，不需要新的数据库迁移。
+第五、六阶段复用 `analysis_results` 表，不需要新的数据库迁移。
 
 完整初始化脚本会创建：
 
@@ -127,9 +141,18 @@ DATAINSIGHT_MYSQL_DATABASE=datainsight_ai
 
 DATAINSIGHT_JWT_SECRET_KEY=replace-with-a-long-random-secret-key
 DATAINSIGHT_DATASET_STORAGE_DIR=../datasets
+DATAINSIGHT_REPORT_STORAGE_DIR=../reports
 DATAINSIGHT_MAX_UPLOAD_SIZE_MB=50
 DATAINSIGHT_MAX_ML_ROWS=5000
+
+DATAINSIGHT_OPENAI_API_KEY=your-api-key
+DATAINSIGHT_OPENAI_BASE_URL=https://api.openai.com/v1
+DATAINSIGHT_OPENAI_MODEL=gpt-5.6-terra
+DATAINSIGHT_OPENAI_API_MODE=responses
+DATAINSIGHT_OPENAI_REASONING_EFFORT=medium
 ```
+
+没有配置 `DATAINSIGHT_OPENAI_API_KEY` 时，注册、数据集、EDA 和机器学习功能仍可正常运行；AI 问答与报告接口会返回清晰的 `503` 配置提示。若接入本地或第三方 OpenAI 兼容服务，可修改 `DATAINSIGHT_OPENAI_BASE_URL`，并按服务能力将 `DATAINSIGHT_OPENAI_API_MODE` 设置为 `chat_completions`。
 
 可以使用 PowerShell 生成随机 JWT 密钥：
 
@@ -201,6 +224,37 @@ npm run dev
 | `GET` | `/api/ml/{dataset_id}/features` | 获取可用于建模的数值字段 |
 | `POST` | `/api/ml/{dataset_id}` | 运行 PCA、Isolation Forest 和 LOF |
 
+### AI 分析师与报告
+
+| 方法 | 地址 | 说明 |
+| --- | --- | --- |
+| `GET` | `/api/ai/status` | 查看 AI 服务是否已配置，不返回密钥 |
+| `POST` | `/api/ai/chat` | 基于指定数据集的分析摘要进行问答 |
+| `POST` | `/api/reports/{dataset_id}` | 生成并保存 HTML 综合报告 |
+| `GET` | `/api/reports` | 获取当前用户的报告列表 |
+| `GET` | `/api/reports/{result_id}/download` | 下载当前用户的 HTML 报告 |
+
+AI 问答请求示例：
+
+```json
+{
+  "dataset_id": 1,
+  "message": "这个数据集最值得关注的三个发现是什么？",
+  "history": [
+    {
+      "role": "user",
+      "content": "先概括数据质量。"
+    },
+    {
+      "role": "assistant",
+      "content": "当前摘要显示存在缺失值和重复记录。"
+    }
+  ]
+}
+```
+
+`history` 可省略。后端默认最多使用最近 12 条历史消息，并将问题和回答保存为结构化结果。
+
 机器学习请求示例：
 
 ```json
@@ -261,9 +315,29 @@ datasets/
     └── 随机文件名.csv
 ```
 
-数据集表只保存用户归属、原始文件名、相对存储路径、行数、字段数和上传时间。分析结果表保存数据画像、统计结果和图表配置。API 不会向前端返回服务器文件路径。
+数据集表只保存用户归属、原始文件名、相对存储路径、行数、字段数和上传时间。分析结果表保存数据画像、统计结果、图表配置、AI 问答和报告元数据。API 不会向前端返回服务器文件路径。
 
-`datasets/` 中的上传内容已被 `.gitignore` 排除，不会提交到 GitHub。
+HTML 报告默认存储在：
+
+```text
+reports/
+└── 用户ID/
+    └── 随机文件名.html
+```
+
+`datasets/` 中的上传内容和 `reports/` 中的生成报告均已被 `.gitignore` 排除，不会提交到 GitHub。
+
+### AI 数据边界
+
+调用 AI 功能时，系统会把下列摘要发送给你配置的 AI 服务：
+
+- 数据集文件名、行数和字段数
+- 缺失值、重复值和字段画像
+- 数值描述性统计、分类字段的前几项频数
+- 已生成图表的类型、标题和相关字段
+- 可选的 PCA 摘要、异常数量和少量高分异常样本编号
+
+系统不会读取并发送完整原始记录或服务器文件路径。分类高频值和异常样本编号仍可能属于业务数据，请根据数据敏感级别决定是否启用外部 AI 服务。
 
 ## 项目结构
 
@@ -271,28 +345,29 @@ datasets/
 DataInsight-AI/
 ├── frontend/
 │   └── src/
-│       ├── api/              身份认证、数据集与分析接口
+│       ├── api/              身份认证、数据集、分析与 AI 接口
 │       ├── components/       通用状态卡片与 ECharts 渲染组件
 │       ├── router/           路由与访问守卫
-│       ├── store/            Pinia 认证、数据集与分析状态
+│       ├── store/            Pinia 认证、数据集、分析与 AI 状态
 │       ├── style/            共享页面样式
 │       ├── utils/            令牌和错误处理
-│       └── views/            登录、工作台、数据集和自动分析页面
+│       └── views/            登录、工作台、数据集、自动分析与 AI 页面
 ├── backend/
 │   └── app/
+│       ├── ai/               AI 提供方适配和安全提示词
 │       ├── api/              FastAPI 路由与依赖
 │       ├── algorithms/       PCA、Isolation Forest 和 LOF
 │       ├── core/             配置、密码和 JWT
 │       ├── database/         SQLAlchemy 连接
 │       ├── models/           用户、数据集和分析结果模型
 │       ├── schemas/          请求与响应模型
-│       └── services/         认证、存储、EDA 与机器学习编排
+│       └── services/         认证、存储、EDA、机器学习与 AI 编排
 ├── database/
 │   ├── init_db.sql           完整初始化脚本
 │   └── migrations/           分阶段数据库迁移
 ├── datasets/                 本地上传文件
 ├── algorithms/               可从项目根目录复用的算法公开入口
-├── reports/                  分析报告（后续阶段）
+├── reports/                  本地 HTML 分析报告
 └── tests/                    后端自动化测试
 ```
 
@@ -304,8 +379,17 @@ DataInsight-AI/
 | `DATAINSIGHT_JWT_SECRET_KEY` | JWT 签名密钥，至少 32 个字符 |
 | `DATAINSIGHT_ACCESS_TOKEN_EXPIRE_MINUTES` | 访问令牌有效时间 |
 | `DATAINSIGHT_DATASET_STORAGE_DIR` | CSV 本地存储目录 |
+| `DATAINSIGHT_REPORT_STORAGE_DIR` | HTML 报告本地存储目录 |
 | `DATAINSIGHT_MAX_UPLOAD_SIZE_MB` | 单个上传文件大小上限 |
 | `DATAINSIGHT_MAX_ML_ROWS` | 单次机器学习分析允许的最大记录数 |
+| `DATAINSIGHT_OPENAI_API_KEY` | AI 服务密钥；不配置时仅禁用 AI 功能 |
+| `DATAINSIGHT_OPENAI_BASE_URL` | OpenAI 或兼容服务的 API 根地址 |
+| `DATAINSIGHT_OPENAI_MODEL` | AI 分析使用的模型名称 |
+| `DATAINSIGHT_OPENAI_API_MODE` | `responses` 或 `chat_completions` |
+| `DATAINSIGHT_OPENAI_REASONING_EFFORT` | 模型推理强度 |
+| `DATAINSIGHT_OPENAI_MAX_OUTPUT_TOKENS` | 单次 AI 输出上限 |
+| `DATAINSIGHT_OPENAI_TIMEOUT_SECONDS` | AI 请求超时时间 |
+| `DATAINSIGHT_AI_MAX_HISTORY_MESSAGES` | 问答使用的最近历史消息数 |
 | `DATAINSIGHT_AUTO_CREATE_TABLES` | 启动时是否创建已实现的数据表 |
 
 请勿提交包含真实数据库密码、JWT 密钥或其他敏感信息的 `.env` 文件。
@@ -334,10 +418,10 @@ npm run build
 3. CSV 数据集上传、存储和管理——已完成
 4. 自动化数据画像、统计分析与可视化——已完成
 5. PCA、Isolation Forest 和 Local Outlier Factor——已完成
-6. AI 数据分析师与 HTML 报告生成
+6. AI 数据分析师与 HTML 报告生成——已完成
 7. 示例数据、完整文档和贡献指南
 
-下一步建议进入第六阶段，实现可扩展的 AI 数据分析服务、提示词编排和 HTML 分析报告。
+下一步建议进入第七阶段，完善示例数据、安装与 API 文档、贡献指南和开源发布检查。
 
 ## 开源协议
 

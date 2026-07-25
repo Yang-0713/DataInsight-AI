@@ -1,6 +1,11 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
-from app.api.dependencies import CurrentUser, DatabaseSession, DatasetStorage
+from app.api.dependencies import (
+    CurrentUser,
+    DatabaseSession,
+    DatasetStorage,
+    ReportStorage,
+)
 from app.core.config import get_settings
 from app.schemas.dataset import DatasetResponse
 from app.services.dataset import (
@@ -76,6 +81,7 @@ def remove_dataset(
     current_user: CurrentUser,
     database: DatabaseSession,
     storage_root: DatasetStorage,
+    report_storage_root: ReportStorage,
 ) -> None:
     dataset = get_user_dataset(database, dataset_id, current_user.id)
     if dataset is None:
@@ -83,4 +89,4 @@ def remove_dataset(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="数据集不存在",
         )
-    delete_dataset(database, dataset, storage_root)
+    delete_dataset(database, dataset, storage_root, report_storage_root)

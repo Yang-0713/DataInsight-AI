@@ -102,9 +102,20 @@ def delete_dataset(
     database: Session,
     dataset: Dataset,
     storage_root: Path,
+    report_storage_root: Path | None = None,
 ) -> None:
     stored_path = (storage_root / dataset.filepath).resolve()
     root = storage_root.resolve()
+    report_paths: list[Path] = []
+    if report_storage_root is not None:
+        report_root = report_storage_root.resolve()
+        for result in dataset.analysis_results:
+            relative = result.result_json.get("report_path")
+            if result.analysis_type != "AI_REPORT" or not isinstance(relative, str):
+                continue
+            candidate = (report_root / relative).resolve()
+            if candidate.is_relative_to(report_root):
+                report_paths.append(candidate)
 
     database.delete(dataset)
     database.commit()
@@ -113,5 +124,11 @@ def delete_dataset(
         stored_path.unlink(missing_ok=True)
         try:
             stored_path.parent.rmdir()
+        except OSError:
+            pass
+    for report_path in report_paths:
+        report_path.unlink(missing_ok=True)
+        try:
+            report_path.parent.rmdir()
         except OSError:
             pass

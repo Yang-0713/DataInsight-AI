@@ -51,9 +51,9 @@ const upcomingModules = [
       <div>
         <p class="eyebrow">AUTHENTICATED WORKSPACE</p>
         <h1>你好，{{ authStore.user?.username }}。</h1>
-        <p>你的分析工作台已经就绪。用 PCA 理解数据结构，并通过双重算法发现异常样本。</p>
-        <RouterLink class="dataset-cta" :to="datasetStore.count ? '/machine-learning' : '/datasets'">
-          {{ datasetStore.count ? '开始异常检测' : '上传数据集' }}
+        <p>你的 AI 分析工作台已经就绪。现在可以基于 EDA 与机器学习摘要，直接提问并生成综合报告。</p>
+        <RouterLink class="dataset-cta" :to="datasetStore.count ? '/ai-analyst' : '/datasets'">
+          {{ datasetStore.count ? '打开 AI 分析师' : '上传数据集' }}
           <span>{{ datasetStore.count }} 个</span>
         </RouterLink>
       </div>
@@ -69,10 +69,10 @@ const upcomingModules = [
 
     <div class="phase-status">
       <div>
-        <span class="status-kicker">PHASE 5</span>
-        <strong>机器学习与异常检测</strong>
+        <span class="status-kicker">PHASE 6</span>
+        <strong>AI 数据分析师</strong>
       </div>
-      <p>PCA、Isolation Forest、LOF、特征预处理和结果持久化已经连接。</p>
+      <p>自然语言问答、结构化上下文、HTML 综合报告与历史结果已经连接。</p>
       <span class="status-complete">已完成</span>
     </div>
 
@@ -81,7 +81,7 @@ const upcomingModules = [
         <span>分析能力</span>
         <h2>你的分析能力路线图</h2>
       </div>
-      <p>EDA 与机器学习均可使用，AI 模块将复用这些结构化结果。</p>
+      <p>EDA、机器学习和 AI 分析现已形成完整的本地分析闭环。</p>
     </div>
 
     <div class="module-grid">
