@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
+from app.database.base import Base
 
 settings = get_settings()
 
@@ -23,3 +24,10 @@ def get_db() -> Generator[Session, None, None]:
     finally:
         database.close()
 
+
+def init_database() -> None:
+    """Create tables owned by implemented phases when they do not yet exist."""
+    # Import models here so SQLAlchemy registers them before create_all runs.
+    from app.models.user import User  # noqa: F401
+
+    Base.metadata.create_all(bind=engine)

@@ -1,5 +1,29 @@
 <script setup lang="ts">
-import { DataAnalysis } from '@element-plus/icons-vue'
+import { computed, onMounted } from 'vue'
+import { DataAnalysis, SwitchButton } from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
+
+import { useAuthStore } from './store/auth'
+
+const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
+const isAuthPage = computed(() => ['login', 'register'].includes(String(route.name)))
+
+onMounted(async () => {
+  await authStore.initialize()
+  if (route.meta.requiresAuth && !authStore.isAuthenticated) {
+    await router.replace({
+      name: 'login',
+      query: { redirect: route.fullPath },
+    })
+  }
+})
+
+async function logout(): Promise<void> {
+  authStore.logout()
+  await router.push({ name: 'login' })
+}
 </script>
 
 <template>
@@ -11,7 +35,24 @@ import { DataAnalysis } from '@element-plus/icons-vue'
         </span>
         <span>DataInsight AI</span>
       </RouterLink>
-      <span class="phase-badge">Phase 1</span>
+      <div class="header-actions">
+        <template v-if="authStore.user && !isAuthPage">
+          <span class="user-chip">
+            <span class="user-avatar">{{ authStore.user.username.slice(0, 1).toUpperCase() }}</span>
+            {{ authStore.user.username }}
+          </span>
+          <el-button text :icon="SwitchButton" @click="logout">退出</el-button>
+        </template>
+        <template v-else-if="isAuthPage">
+          <RouterLink v-if="route.name === 'login'" class="header-link" to="/register">
+            创建账户
+          </RouterLink>
+          <RouterLink v-else class="header-link" to="/login">
+            返回登录
+          </RouterLink>
+        </template>
+        <span class="phase-badge">第二阶段</span>
+      </div>
     </header>
 
     <main>
@@ -19,4 +60,3 @@ import { DataAnalysis } from '@element-plus/icons-vue'
     </main>
   </div>
 </template>
-

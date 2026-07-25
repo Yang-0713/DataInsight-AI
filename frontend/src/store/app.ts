@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 export const useAppStore = defineStore('app', {
   state: () => ({
     projectName: 'DataInsight AI',
-    phase: 1,
+    phase: 2,
   }),
 })
-

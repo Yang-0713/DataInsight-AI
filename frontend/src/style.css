@@ -43,6 +43,37 @@ a {
   margin: 0 auto;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-link {
+  color: #4e50c8;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #4d566e;
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.user-avatar {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  color: white;
+  background: #5b5cf0;
+  border-radius: 10px;
+  place-items: center;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -77,5 +108,8 @@ a {
   .app-header {
     width: min(100% - 28px, 1120px);
   }
-}
 
+  .user-chip {
+    display: none;
+  }
+}
