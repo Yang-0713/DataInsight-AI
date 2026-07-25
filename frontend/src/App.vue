@@ -37,6 +37,10 @@ async function logout(): Promise<void> {
       </RouterLink>
       <div class="header-actions">
         <template v-if="authStore.user && !isAuthPage">
+          <nav class="main-nav" aria-label="主要导航">
+            <RouterLink to="/dashboard">工作台</RouterLink>
+            <RouterLink to="/datasets">数据集</RouterLink>
+          </nav>
           <span class="user-chip">
             <span class="user-avatar">{{ authStore.user.username.slice(0, 1).toUpperCase() }}</span>
             {{ authStore.user.username }}
@@ -51,7 +55,7 @@ async function logout(): Promise<void> {
             返回登录
           </RouterLink>
         </template>
-        <span class="phase-badge">第二阶段</span>
+        <span class="phase-badge">第三阶段</span>
       </div>
     </header>
 

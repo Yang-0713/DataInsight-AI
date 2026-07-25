@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Annotated
 
 import jwt
@@ -6,6 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
+from app.core.config import get_settings
 from app.database.session import get_db
 from app.models.user import User
 
@@ -45,3 +47,10 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def get_dataset_storage() -> Path:
+    return get_settings().dataset_storage_path
+
+
+DatasetStorage = Annotated[Path, Depends(get_dataset_storage)]

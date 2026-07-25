@@ -49,6 +49,30 @@ a {
   gap: 10px;
 }
 
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  margin-right: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(30, 42, 76, 0.08);
+  border-radius: 11px;
+}
+
+.main-nav a {
+  padding: 7px 11px;
+  color: #70788d;
+  font-size: 0.8rem;
+  font-weight: 650;
+  border-radius: 8px;
+}
+
+.main-nav a.router-link-active {
+  color: #4f50cc;
+  background: #eeeeff;
+}
+
 .header-link {
   color: #4e50c8;
   font-size: 0.86rem;
@@ -111,5 +135,13 @@ a {
 
   .user-chip {
     display: none;
+  }
+
+  .phase-badge {
+    display: none;
+  }
+
+  .main-nav {
+    margin-right: 0;
   }
 }

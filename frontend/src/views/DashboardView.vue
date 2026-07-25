@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import {
   DataAnalysis,
   Lock,
   MagicStick,
-  UploadFilled,
+  TrendCharts,
 } from '@element-plus/icons-vue'
 
 import { useAuthStore } from '../store/auth'
+import { useDatasetStore } from '../store/datasets'
 
 const authStore = useAuthStore()
+const datasetStore = useDatasetStore()
+
+onMounted(() => datasetStore.load())
 const joinedDate = computed(() => {
   if (!authStore.user) return ''
   return new Intl.DateTimeFormat('zh-CN', {
@@ -21,16 +25,16 @@ const joinedDate = computed(() => {
 
 const upcomingModules = [
   {
-    icon: UploadFilled,
-    title: '数据集管理',
-    description: '上传 CSV、查看数据集信息并管理个人数据资产。',
-    phase: '第三阶段',
-  },
-  {
     icon: DataAnalysis,
     title: '自动化 EDA',
     description: '生成数据画像、统计结果和适用于 ECharts 的图表数据。',
     phase: '第四阶段',
+  },
+  {
+    icon: TrendCharts,
+    title: '异常检测',
+    description: '使用 PCA、Isolation Forest 和 LOF 识别异常样本。',
+    phase: '第五阶段',
   },
   {
     icon: MagicStick,
@@ -47,7 +51,11 @@ const upcomingModules = [
       <div>
         <p class="eyebrow">AUTHENTICATED WORKSPACE</p>
         <h1>你好，{{ authStore.user?.username }}。</h1>
-        <p>身份认证系统已经就绪。你的个人数据分析空间将在这里逐步展开。</p>
+        <p>你的个人数据空间已经就绪。上传 CSV，开始构建可分析的数据资产。</p>
+        <RouterLink class="dataset-cta" to="/datasets">
+          管理数据集
+          <span>{{ datasetStore.count }} 个</span>
+        </RouterLink>
       </div>
       <div class="account-card">
         <span class="account-icon"><el-icon :size="20"><Lock /></el-icon></span>
@@ -61,10 +69,10 @@ const upcomingModules = [
 
     <div class="phase-status">
       <div>
-        <span class="status-kicker">PHASE 2</span>
-        <strong>账户与访问控制</strong>
+        <span class="status-kicker">PHASE 3</span>
+        <strong>数据集上传与管理</strong>
       </div>
-      <p>注册、登录、密码哈希、JWT 签发和受保护用户接口已连接。</p>
+      <p>CSV 验证、本地文件存储、MySQL 元数据和用户级访问控制已连接。</p>
       <span class="status-complete">已完成</span>
     </div>
 
@@ -119,11 +127,33 @@ h1 {
   letter-spacing: -0.06em;
 }
 
-.dashboard-hero > div > p:last-child {
+.dashboard-hero > div > p:not(.eyebrow) {
   max-width: 640px;
   margin: 20px 0 0;
   color: #687189;
   line-height: 1.7;
+}
+
+.dataset-cta {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 14px;
+  margin-top: 24px;
+  color: white;
+  font-size: 0.83rem;
+  font-weight: 700;
+  background: #5b5cf0;
+  border-radius: 11px;
+  box-shadow: 0 10px 24px rgba(91, 92, 240, 0.22);
+}
+
+.dataset-cta span {
+  padding: 3px 7px;
+  color: #dadaff;
+  font-size: 0.68rem;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
 }
 
 .account-card {

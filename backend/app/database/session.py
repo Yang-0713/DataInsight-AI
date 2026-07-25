@@ -28,6 +28,7 @@ def get_db() -> Generator[Session, None, None]:
 def init_database() -> None:
     """Create tables owned by implemented phases when they do not yet exist."""
     # Import models here so SQLAlchemy registers them before create_all runs.
+    from app.models.dataset import Dataset  # noqa: F401
     from app.models.user import User  # noqa: F401
 
     Base.metadata.create_all(bind=engine)

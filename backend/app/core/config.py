@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 from urllib.parse import quote_plus
 
 from pydantic import Field, SecretStr
@@ -32,6 +33,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = Field(default=60, ge=5, le=1440)
 
+    dataset_storage_dir: Path = Path("../datasets")
+    max_upload_size_mb: int = Field(default=50, ge=1, le=500)
+
     cors_origins: list[str] = [
         "http://127.0.0.1:5173",
         "http://localhost:5173",
@@ -46,6 +50,10 @@ class Settings(BaseSettings):
             f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
             "?charset=utf8mb4"
         )
+
+    @property
+    def dataset_storage_path(self) -> Path:
+        return self.dataset_storage_dir.expanduser().resolve()
 
 
 @lru_cache
