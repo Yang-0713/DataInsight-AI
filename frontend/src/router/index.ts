@@ -37,6 +37,12 @@ const router = createRouter({
       component: DatasetsView,
       meta: { requiresAuth: true },
     },
+    {
+      path: '/analysis/:datasetId?',
+      name: 'analysis',
+      component: () => import('../views/AnalysisView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

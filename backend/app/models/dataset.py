@@ -32,6 +32,12 @@ class Dataset(Base):
     )
 
     user: Mapped["User"] = relationship(back_populates="datasets")
+    analysis_results: Mapped[list["AnalysisResult"]] = relationship(
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 
+from app.models.analysis_result import AnalysisResult  # noqa: E402
 from app.models.user import User  # noqa: E402
